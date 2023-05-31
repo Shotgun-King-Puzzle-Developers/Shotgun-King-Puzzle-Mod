@@ -378,7 +378,7 @@ scr.flash::scr.flash
 lang::lang
 on::on
 off::off
-mod::mod
+mod::
 none::none
 
 -- PIECES

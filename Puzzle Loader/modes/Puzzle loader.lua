@@ -1,58 +1,8 @@
-id = "1_template_throne"
+id = "Puzzle loader"
 setup = {
   slots_max = { 10, 10 },
 }
-weapons = {
-  { gid = 0, name = "Example 0", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 0" },
-  { gid = 1, name = "Example 1", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 1" },
-  { gid = 2, name = "Example 2", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 2" },
-  { gid = 3, name = "Example 3", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 3" },
-  { gid = 4, name = "Example 4", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 4" },
-  { gid = 5, name = "Example 5", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 5" },
-  { gid = 6, name = "Example 6", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 6" },
-  { gid = 7, name = "Example 7", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 7" },
-  { gid = 8, name = "Example 8", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 8" },
-  { gid = 9, name = "Example 9", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 9" },
-  { gid = 10, name = "Example 10", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 10" },
-  { gid = 11, name = "Example 11", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 11" },
-  { gid = 12, name = "Example 12", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 12" },
-  { gid = 13, name = "Example 13", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 13" },
-  { gid = 14, name = "Example 14", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 14" },
-  { gid = 15, name = "Example 15", chamber_max = 2, firepower = 5, firerange = 5, spread = 50, ammo_max = 4,
-    desc = "Description 15" },
-}
-ranks = {
-  { nothing = 1 },
-  { gain = { 0, 0 } },
-  { gain = { 3 } },
-  { king_hp = 1 },
-  { gain = { 1 } },
-  { spread = 10 },
-  { king_hp = 1 },
-  { gain = { 2 } },
-  { rook_hp = 1 },
-  { knight_hp = 1 },
-  { boss_hprc = 200 },
-  { spread = 15 },
-  { rook_hp = 1 },
-  { ammo_max = -1 },
-  { all_hp = 1, ammo_max = 2 },
-}
+
 base = {
   promotion = 1, surrender = 1,
   gain = { 0, 0, 0, 1, 5, 2, 0 }
@@ -74,6 +24,16 @@ do -- VERSION 2.9
         return
       end
       if allow_modules and tbl_index(module.id, ban_modules) < 0 then
+        return
+      end
+      add(MODULES, module)
+    end
+  )
+
+  PUZZLES = {}
+  foreach(
+    ls("mods/" .. MODNAME .. "/puzzles/"), function(module_name)
+      if module_name:sub(-4) ~= ".lua" then
         return
       end
       add(MODULES, module)
@@ -685,6 +645,20 @@ do -- VERSION 2.9
           end
         end
       end
+
+      for puzzle in all(PUZZLES) do -- Load Puzzles
+        if module.start then
+          module.start()
+        end
+        for k, v in pairs(module) do
+          if function_pairs[k] then
+            add_listener(function_pairs[k], v)
+          end
+          if k:sub(1, 3) == "on_" and LISTENER.listeners[k:sub(4)] then
+            add_listener(k:sub(4), v)
+          end
+        end
+      end
     end
 
     function add_listener(event, listener)
@@ -884,19 +858,16 @@ do
 end
 -- MOD CODE END
 
+function puzzle_menu()
+  mod_setup()
+  for i in PUZZLES do
+    _log("fortnite")
+end
+
 function start()
+  puzzle_menu()
 
-  init_vig({ 1, 2, 3 }, function()
-    init_game()
-    mode.lvl = 0
-    mode.turns = 0
-
-    -- MOD SETUP
-    mod_setup()
-
-    next_floor()
-  end)
-
+  init_menu()
 end
 
 function next_floor()
