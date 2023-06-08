@@ -36,7 +36,7 @@ do -- VERSION 2.9
       if module_name:sub(-4) ~= ".lua" then
         return
       end
-      add(MODULES, module)
+      add(PUZZLES, module)
     end
   )
 
